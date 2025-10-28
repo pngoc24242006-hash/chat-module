@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebSocket Chat Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #chat {
+      width: 400px;
+      max-width: 90%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+    }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      background: #fafafa;
+    }
+    #messages div {
+      margin-bottom: 8px;
+    }
+    .you { color: #007bff; }
+    .other { color: #333; }
+    input, button {
+      padding: 8px;
+      margin: 4px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>💬 WebSocket Chat Test</h2>
+  <div id="chat">
+    <div>
+      <label for="user">User ID: </label>
+      <input id="user" placeholder="Enter your name" />
+      <button onclick="connect()">Connect</button>
+    </div>
+    <div id="messages"></div>
+    <div>
+      <input id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    let ws;
+    let userId;
+
+    function connect() {
+      userId = document.getElementById("user").value.trim();
+      if (!userId) {
+        alert("Enter user ID first!");
+        return;
+      }
+
+      ws = new WebSocket(`ws://${location.host}/ws/chat/${userId}`);
+
+      ws.onopen = () => {
+        addMessage("System", "Connected as " + userId);
+      };
+
+      ws.onmessage = (event) => {
+        addMessage("Server", event.data);
+      };
+
+      ws.onclose = () => {
+        addMessage("System", "Disconnected!");
+      };
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const msg = input.value.trim();
+      if (msg && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(msg);
+        addMessage(userId, msg, true);
+        input.value = "";
+      }
+    }
+
+    function addMessage(sender, text, isYou = false) {
+      const div = document.createElement("div");
+      div.innerHTML = `<strong class="${isYou ? 'you' : 'other'}">${sender}:</strong> ${text}`;
+      const box = document.getElementById("messages");
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+  </script>
+</body>
+</html>
