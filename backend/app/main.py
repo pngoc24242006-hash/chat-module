@@ -21,8 +21,8 @@ app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 app.include_router(signaling_router, prefix="/ws", tags=["Signaling"])
 
 # Mount static (nếu bạn build FE hoặc có file HTML test)
-# app.mount(
-#     "/",
-#     StaticFiles(directory="app/static", html=True),
-#     name="static",
-# )
+app.mount(
+    "/",
+    StaticFiles(directory="app/static", html=True),
+    name="static",
+)
